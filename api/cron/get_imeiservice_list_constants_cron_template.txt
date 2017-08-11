@@ -1,0 +1,90 @@
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * @file
+ * Dynamically generated connection details for a Service Provider.
+ * This file is used for cron based API 'Actions'
+ * This is from Dhru Fusion, the API remote client enabled connection.
+ * @link http://wiki.dhru.com/Client_Remote_APi Dhru Client Remote API. @endlink
+ */
+
+define("SUWP_REQUESTFORMAT_IMEISERVICELIST_SUAPIPROVIDERNUM", "JSON");
+define("SUWP_DHRUFUSION_URL_IMEISERVICELIST_SUAPIPROVIDERNUM", $suwp_dhru_url);
+define("SUWP_USERNAME_IMEISERVICELIST_SUAPIPROVIDERNUM", $suwp_dhru_username);
+define("SUWP_API_ACCESS_KEY_IMEISERVICELIST_SUAPIPROVIDERNUM", $suwp_dhru_api_key);
+
+
+if (!extension_loaded('curl')) {
+  trigger_error('cURL extension not installed', E_USER_ERROR);
+}
+class StockunlocksDhruFusion_IMEISERVICELIST_SUAPIPROVIDERNUM {
+  var $xmlData;
+  var $xmlResult;
+  var $debug;
+  var $action;
+
+/**
+ * Initializes xmldata.
+ */
+  function __construct() {
+    $this->xmldata = new DOMDocument();
+  }
+
+/**
+ * Return the xml results.
+ */
+  function getResult() {
+    return $this->xmlresult;
+  }
+
+/**
+ * Connect with the remote client.
+ */
+  function action($action, $arr = array()) {
+    if (is_string($action)) {
+      if (is_array($arr)) {
+        if (count($arr)) {
+          $request = $this->xmldata->createElement("PARAMETERS");
+          $this->xmldata->appendChild($request);
+          foreach ($arr as $key => $val) {
+            $key = strtoupper($key);
+            $request->appendChild($this->xmldata->createElement($key, $val));
+          }
+        }
+        $posted = array(
+          'username' => SUWP_USERNAME_IMEISERVICELIST_SUAPIPROVIDERNUM,
+          'apiaccesskey' => SUWP_API_ACCESS_KEY_IMEISERVICELIST_SUAPIPROVIDERNUM,
+          'action' => $action,
+          'requestformat' => SUWP_REQUESTFORMAT_IMEISERVICELIST_SUAPIPROVIDERNUM,
+          'parameters' => $this->xmldata->saveHTML(),
+        );
+        $crul = curl_init();
+        curl_setopt($crul, CURLOPT_HEADER, FALSE);
+        curl_setopt($crul, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        // curl_setopt($crul, CURLOPT_FOLLOWLOCATION, TRUE); By default.
+        curl_setopt($crul, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($crul, CURLOPT_URL, SUWP_DHRUFUSION_URL_IMEISERVICELIST_SUAPIPROVIDERNUM . '/api/index.php');
+        curl_setopt($crul, CURLOPT_POST, TRUE);
+        curl_setopt($crul, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($crul, CURLOPT_POSTFIELDS, $posted);
+        $response = curl_exec($crul);
+        if (curl_errno($crul) != CURLE_OK) {
+          echo curl_error($crul);
+          curl_close($crul);
+        }
+        else {
+          curl_close($crul);
+          if ($this->debug) {
+            // echo "<textarea rows='20' cols='200'> "; By default.
+            // print_r($response); By default.
+            // echo "</textarea>"; By default.
+          }
+          return (json_decode($response, TRUE));
+        }
+      }
+    }
+    return FALSE;
+  }
+}
